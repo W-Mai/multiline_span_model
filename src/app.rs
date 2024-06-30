@@ -7,6 +7,9 @@ pub struct App {
 
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
+
+    span_rect: egui::Rect,
+    span_group_width: f32,
 }
 
 impl Default for App {
@@ -15,6 +18,12 @@ impl Default for App {
             // Example stuff:
             label: "Hello World!".to_owned(),
             value: 2.7,
+
+            span_rect: egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::Vec2::new(10.0, 20.0),
+            ),
+            span_group_width: 100.0,
         }
     }
 }
@@ -79,15 +88,21 @@ impl App {
 
             let plot = egui_plot::Plot::new("my_plot")
                 .data_aspect(1.0)
-                .allow_zoom(false)
-                .allow_drag(false)
-                .allow_scroll(false)
-                .allow_boxed_zoom(false)
-                .allow_double_click_reset(false);
-
+                .allow_zoom(true)
+                .allow_drag(true)
+                .allow_scroll(true)
+                .allow_boxed_zoom(true)
+                .allow_double_click_reset(true);
 
             plot.show(ui, |plot_ui| {
-                plot_ui.line(egui_plot::Line::new(egui_plot::PlotPoints::new(Vec::from([[0.0, 0.0], [1.0, 1.0]]))));
+                plot_ui.line(egui_plot::Line::new(
+                    egui_plot::PlotPoints::new(
+                        vec![
+                            [self.span_rect.min.x as f64, self.span_rect.min.y as f64],
+                            [self.span_group_width as f64, self.span_rect.min.y as f64],
+                            [self.span_group_width as f64, self.span_rect.max.y as f64],
+                        ]
+                    )));
             });
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
