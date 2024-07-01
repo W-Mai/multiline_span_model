@@ -1,4 +1,13 @@
+use std::ops::RangeInclusive;
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
+#[derive(Default, Copy, Clone, serde::Deserialize, serde::Serialize)]
+#[serde(default)]
+pub struct SpanCord {
+    start: [f64; 2],
+    height: f64,
+}
+
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct App {
@@ -8,7 +17,7 @@ pub struct App {
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
 
-    span_rect: egui::Rect,
+    span_rect: SpanCord,
     span_group_width: f32,
 }
 
@@ -19,10 +28,10 @@ impl Default for App {
             label: "Hello World!".to_owned(),
             value: 2.7,
 
-            span_rect: egui::Rect::from_min_size(
-                egui::Pos2::ZERO,
-                egui::Vec2::new(10.0, 20.0),
-            ),
+            span_rect: SpanCord {
+                start: [20.0, 0.0],
+                height: 10.0,
+            },
             span_group_width: 100.0,
         }
     }
@@ -94,14 +103,27 @@ impl App {
                 .allow_boxed_zoom(true)
                 .allow_double_click_reset(true);
 
+            let tmp_span_cord = SpanCord {
+                start: [50.0, 50.0],
+                height: 10.0,
+            };
+            println!("{:?}", self.span_rect.start);
             plot.show(ui, |plot_ui| {
                 plot_ui.line(egui_plot::Line::new(
                     egui_plot::PlotPoints::new(
                         vec![
-                            [self.span_rect.min.x as f64, self.span_rect.min.y as f64],
-                            [self.span_group_width as f64, self.span_rect.min.y as f64],
-                            [self.span_group_width as f64, self.span_rect.max.y as f64],
-                        ]
+                            self.span_rect.start,
+                            [self.span_group_width as f64, self.span_rect.start[1]],
+                            [self.span_group_width as f64, tmp_span_cord.start[1]],
+                            tmp_span_cord.start,
+                            [tmp_span_cord.start[0], tmp_span_cord.start[1] + tmp_span_cord.height],
+                            [0.0, tmp_span_cord.start[1] + tmp_span_cord.height],
+                            [0.0, self.span_rect.start[1] + self.span_rect.height],
+                            [self.span_rect.start[0], self.span_rect.start[1] + self.span_rect.height],
+                            self.span_rect.start,
+                        ].iter().map(
+                            |p| [p[0], -p[1]]
+                        ).collect::<Vec<_>>()
                     )));
             });
 
