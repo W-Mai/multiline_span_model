@@ -109,22 +109,25 @@ impl App {
             };
             println!("{:?}", self.span_rect.start);
             plot.show(ui, |plot_ui| {
-                plot_ui.line(egui_plot::Line::new(
-                    egui_plot::PlotPoints::new(
-                        vec![
-                            self.span_rect.start,
-                            [self.span_group_width as f64, self.span_rect.start[1]],
-                            [self.span_group_width as f64, tmp_span_cord.start[1]],
-                            tmp_span_cord.start,
-                            [tmp_span_cord.start[0], tmp_span_cord.start[1] + tmp_span_cord.height],
-                            [0.0, tmp_span_cord.start[1] + tmp_span_cord.height],
-                            [0.0, self.span_rect.start[1] + self.span_rect.height],
-                            [self.span_rect.start[0], self.span_rect.start[1] + self.span_rect.height],
-                            self.span_rect.start,
-                        ].iter().map(
-                            |p| [p[0], -p[1]]
-                        ).collect::<Vec<_>>()
-                    )));
+                plot_ui.polygon(
+                    egui_plot::Polygon::new(
+                        egui_plot::PlotPoints::new(
+                            vec![
+                                self.span_rect.start,
+                                [self.span_group_width as f64, self.span_rect.start[1]],
+                                [self.span_group_width as f64, tmp_span_cord.start[1]],
+                                tmp_span_cord.start,
+                                [tmp_span_cord.start[0], tmp_span_cord.start[1] + tmp_span_cord.height],
+                                [0.0, tmp_span_cord.start[1] + tmp_span_cord.height],
+                                [0.0, self.span_rect.start[1] + self.span_rect.height],
+                                [self.span_rect.start[0], self.span_rect.start[1] + self.span_rect.height],
+                                self.span_rect.start,
+                            ].iter().map(
+                                |p| [p[0], -p[1]]
+                            ).collect::<Vec<_>>()
+                        )
+                    )
+                );
             });
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
