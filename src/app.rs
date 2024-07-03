@@ -1,5 +1,3 @@
-use std::ops::RangeInclusive;
-
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(Default, Copy, Clone, serde::Deserialize, serde::Serialize)]
 #[serde(default)]
@@ -17,7 +15,7 @@ pub struct App {
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
 
-    span_rect: SpanCord,
+    span_rect: Vec<SpanCord>,
     span_group_width: f32,
 }
 
@@ -28,10 +26,36 @@ impl Default for App {
             label: "Hello World!".to_owned(),
             value: 2.7,
 
-            span_rect: SpanCord {
-                start: [20.0, 0.0],
-                height: 10.0,
-            },
+            span_rect: vec![
+                SpanCord {
+                    start: [10.0, 0.0],
+                    height: 10.0,
+                },
+                SpanCord {
+                    start: [50.0, 50.0],
+                    height: 20.0,
+                },
+                SpanCord {
+                    start: [20.0, 150.0],
+                    height: 10.0,
+                },
+                SpanCord {
+                    start: [70.0, 200.0],
+                    height: 50.0,
+                },
+                SpanCord {
+                    start: [15.0, 300.0],
+                    height: 10.0,
+                },
+                SpanCord {
+                    start: [80.0, 400.0],
+                    height: 10.0,
+                },
+                SpanCord {
+                    start: [100.0, 500.0],
+                    height: 10.0,
+                },
+            ],
             span_group_width: 100.0,
         }
     }
@@ -45,9 +69,9 @@ impl App {
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
-        if let Some(storage) = cc.storage {
-            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
-        }
+        // if let Some(storage) = cc.storage {
+        //     return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+        // }
 
         Default::default()
     }
@@ -103,31 +127,31 @@ impl App {
                 .allow_boxed_zoom(true)
                 .allow_double_click_reset(true);
 
-            let tmp_span_cord = SpanCord {
-                start: [50.0, 50.0],
-                height: 10.0,
-            };
-            println!("{:?}", self.span_rect.start);
             plot.show(ui, |plot_ui| {
-                plot_ui.polygon(
-                    egui_plot::Polygon::new(
-                        egui_plot::PlotPoints::new(
-                            vec![
-                                self.span_rect.start,
-                                [self.span_group_width as f64, self.span_rect.start[1]],
-                                [self.span_group_width as f64, tmp_span_cord.start[1]],
-                                tmp_span_cord.start,
-                                [tmp_span_cord.start[0], tmp_span_cord.start[1] + tmp_span_cord.height],
-                                [0.0, tmp_span_cord.start[1] + tmp_span_cord.height],
-                                [0.0, self.span_rect.start[1] + self.span_rect.height],
-                                [self.span_rect.start[0], self.span_rect.start[1] + self.span_rect.height],
-                                self.span_rect.start,
-                            ].iter().map(
-                                |p| [p[0], -p[1]]
-                            ).collect::<Vec<_>>()
-                        )
-                    )
-                );
+                for pair in self.span_rect.windows(2) {
+                    let first = pair[0];
+                    let second = pair[1];
+                    plot_ui.polygon(
+                        egui_plot::Polygon::new(
+                            egui_plot::PlotPoints::new(
+                                vec![
+                                    first.start,
+                                    [self.span_group_width as f64, first.start[1]],
+                                    [self.span_group_width as f64, second.start[1]],
+                                    second.start,
+                                    [second.start[0], second.start[1] + second.height],
+                                    [0.0, second.start[1] + second.height],
+                                    [0.0, first.start[1] + first.height],
+                                    [first.start[0], first.start[1] + first.height],
+                                    first.start,
+                                ].iter().map(
+                                    |p| [p[0], -p[1]]
+                                ).collect::<Vec<_>>()
+                            )
+                        ).fill_color(egui::Color32::from_rgba_premultiplied(0, 0, 0, 0))
+                            .width(5.0)
+                    );
+                }
             });
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
