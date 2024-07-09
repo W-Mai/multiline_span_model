@@ -48,6 +48,14 @@ impl Default for App {
                     height: 10.0,
                 },
                 SpanCord {
+                    start: [25.0, 300.0],
+                    height: 10.0,
+                },
+                SpanCord {
+                    start: [80.0, 300.0],
+                    height: 10.0,
+                },
+                SpanCord {
                     start: [80.0, 400.0],
                     height: 10.0,
                 },
