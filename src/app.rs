@@ -119,6 +119,22 @@ impl eframe::App for App {
     }
 }
 
+fn get_span_coords(span_group_width: f32, first: SpanCord, second: SpanCord) -> Vec<[f64; 2]> {
+    vec![
+        first.start,
+        [span_group_width as f64, first.start[1]],
+        [span_group_width as f64, second.start[1]],
+        second.start,
+        [second.start[0], second.start[1] + second.height],
+        [0.0, second.start[1] + second.height],
+        [0.0, first.start[1] + first.height],
+        [first.start[0], first.start[1] + first.height],
+        first.start,
+    ].iter().map(
+        |p| [p[0], -p[1]]
+    ).collect::<Vec<_>>()
+}
+
 impl App {
     fn center_panel(&mut self, ctx: &egui::Context) {
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -142,19 +158,7 @@ impl App {
                     plot_ui.polygon(
                         egui_plot::Polygon::new(
                             egui_plot::PlotPoints::new(
-                                vec![
-                                    first.start,
-                                    [self.span_group_width as f64, first.start[1]],
-                                    [self.span_group_width as f64, second.start[1]],
-                                    second.start,
-                                    [second.start[0], second.start[1] + second.height],
-                                    [0.0, second.start[1] + second.height],
-                                    [0.0, first.start[1] + first.height],
-                                    [first.start[0], first.start[1] + first.height],
-                                    first.start,
-                                ].iter().map(
-                                    |p| [p[0], -p[1]]
-                                ).collect::<Vec<_>>()
+                                get_span_coords(self.span_group_width, first, second)
                             )
                         ).fill_color(egui::Color32::from_rgba_premultiplied(0, 0, 0, 0))
                             .width(5.0)
