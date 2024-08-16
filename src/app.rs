@@ -32,6 +32,10 @@ impl Default for App {
                     height: 10.0,
                 },
                 SpanCord {
+                    start: [50.0, 0.0],
+                    height: 10.0,
+                },
+                SpanCord {
                     start: [50.0, 50.0],
                     height: 20.0,
                 },
@@ -71,7 +75,7 @@ impl Default for App {
 
 impl App {
     /// Called once before the first frame.
-    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         // This is also where you can customize the look and feel of egui using
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
 
